@@ -1,0 +1,14 @@
+{
+  "name": "reddit-analyzer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Reddit TOEFL community analyzer for high-value content",
+  "scripts": {
+    "start": "bun src/analyzer.ts",
+    "dev": "bun --watch src/analyzer.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

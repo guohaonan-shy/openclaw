@@ -1,5 +1,11 @@
 FROM node:22-bookworm
 
+# Install gosu for user switching in entrypoint (Railway volume permissions)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gosu && \
+    rm -rf /var/lib/apt/lists/* && \
+    gosu nobody true
+
 # Install Bun (required for build scripts)
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
@@ -34,15 +40,16 @@ ENV NODE_ENV=production
 # Allow non-root user to write temp files during runtime/tests.
 RUN chown -R node:node /app
 
-# Create data directories for Railway/container platforms with correct permissions
-# This ensures the node user can write to /data when a volume is mounted
-RUN mkdir -p /data/.openclaw /data/workspace && \
-    chown -R node:node /data
+# Copy entrypoint script for Railway volume permission handling
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
-USER node
+# Security note: Container starts as root to fix volume permissions,
+# then entrypoint switches to node user (uid 1000) before running the app.
+# This is required for Railway/container platforms where volumes are mounted with root ownership.
+
+# Use entrypoint to handle volume permissions at startup
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Start gateway server with default config.
 # Binds to loopback (127.0.0.1) by default for security.

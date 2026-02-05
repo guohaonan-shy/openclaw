@@ -52,9 +52,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Start gateway server with default config.
-# Binds to loopback (127.0.0.1) by default for security.
-#
-# For container platforms requiring external health checks:
-#   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
+# For Railway/container platforms:
+#   - Binds to lan (0.0.0.0) to accept external connections via HTTP Proxy
+#   - Uses PORT env var (default 8080 on Railway) or falls back to 18789
+#   - Requires OPENCLAW_GATEWAY_TOKEN to be set
+CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured", "--bind", "lan"]

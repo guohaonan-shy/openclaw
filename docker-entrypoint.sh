@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Railway compatibility: map PORT to OPENCLAW_GATEWAY_PORT
+if [ -n "$PORT" ] && [ -z "$OPENCLAW_GATEWAY_PORT" ]; then
+  export OPENCLAW_GATEWAY_PORT="$PORT"
+fi
+
 # Ensure data directories exist with correct permissions when volume is mounted
 # This runs at container startup, after volumes are mounted
 if [ -d "/data" ]; then
